@@ -1,0 +1,7 @@
+# Everything from requirements.txt
+-r requirements.txt
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+httpx>=0.25.0        # TestClient dependency

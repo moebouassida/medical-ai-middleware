@@ -1,0 +1,22 @@
+# Core — required
+fastapi>=0.104.0
+starlette>=0.27.0
+Pillow>=10.0.0
+uvicorn>=0.24.0
+
+# Monitoring
+prometheus-client>=0.19.0
+
+# Rate limiting
+slowapi>=0.1.9
+
+# S3 storage (optional — set S3_ENABLED=true to use)
+boto3>=1.34.0
+
+# XAI
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0
+
+# DICOM anonymization (optional)
+pydicom>=2.4.0

@@ -1,0 +1,16 @@
+.env
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.venv/
+.pytest_cache/
+.coverage
+logs/
+*.jsonl
+.DS_Store
+.vscode/
+venv/
+.env.example
+xai_integration_examples.py

@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    env:
+      AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION:            ${{ secrets.AWS_REGION }}
+      S3_BUCKET_LOGS:        ${{ secrets.S3_BUCKET_LOGS }}
+      S3_BUCKET_UPLOADS:     ${{ secrets.S3_BUCKET_UPLOADS }}
+      S3_ENABLED:            "false"   # keep off in CI — no real S3 calls
+      REQUIRE_CONSENT:       "true"
+      AUDIT_LOG_PATH:        "/tmp/test_audit.jsonl"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-dev.txt
+          pip install -e .
+
+      - name: Lint (ruff)
+        run: |
+          pip install ruff
+          ruff check medical_middleware/ tests/ --ignore E501
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
+
+  publish:
+    name: Tag Release
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package
+        run: pip install -e .
+
+      - name: Create version tag
+        run: |
+          VERSION=$(python -c "import medical_middleware; print(medical_middleware.__version__)")
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag -a "v$VERSION" -m "Release v$VERSION" || echo "Tag already exists"
+          git push origin "v$VERSION" || echo "Tag push skipped"
