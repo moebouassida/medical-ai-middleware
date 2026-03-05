@@ -57,7 +57,9 @@ jobs:
           python-version: "3.11"
 
       - name: Install package
-        run: pip install -e .
+        run: |
+          pip install -r requirements-dev.txt
+          pip install -e .
 
       - name: Create version tag
         run: |
